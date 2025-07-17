@@ -1,0 +1,15 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant
+    environment:
+      QDRANT__SERVICE__API_KEY: "your-strong-api-key"  # <-- mapping, not a list
+
+volumes:
+  qdrant_data:
+
