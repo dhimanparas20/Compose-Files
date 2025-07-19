@@ -1,0 +1,12 @@
+services:
+  mqtt-explorer:
+    image: smeagolworms4/mqtt-explorer:latest
+    container_name: mqtt-explorer
+    ports:
+      - "4000:4000"  # Exposes MQTT Explorer UI on port 4000
+    restart: unless-stopped
+    environment:
+      - TZ=UTC  # Set your timezone if needed, e.g., Europe/Berlin
+    # Optional: Uncomment and set if you want to persist settings
+    # volumes:
+    #   - ./mqtt-explorer-data:/data
