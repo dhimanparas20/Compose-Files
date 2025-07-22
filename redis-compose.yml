@@ -17,5 +17,17 @@ services:
     volumes:
       - redis-data:/data
 
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    restart: always
+    ports:
+      - "8001:5540"
+    depends_on:
+      - redis
+    environment:
+      - REDISINSIGHT_HOST=0.0.0.0
+      
+
 volumes:
   redis-data:
