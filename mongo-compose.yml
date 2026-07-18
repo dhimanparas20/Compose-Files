@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     # FIXED: Swapped from '7.0-noble' to the correct official '7.0-jammy' tag
