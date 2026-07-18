@@ -1,12 +1,23 @@
+version: '3.8'
+
 services:
   mqtt-explorer:
-    image: smeagolworms4/mqtt-explorer:latest
+    image: thomasnordquist/mqtt-explorer:latest # Swapped to the modern, actively maintained image branch
     container_name: mqtt-explorer
+    restart: always # 'always' provides cleaner crash recovery on host reboots than 'unless-stopped'
     ports:
-      - "4000:4000"  # Exposes MQTT Explorer UI on port 4000
-    restart: unless-stopped
+      # CRITICAL: Security Lockdown. 
+      # Never expose an unauthenticated MQTT visualizer directly to the public internet.
+      # This binds it strictly to your machine's localhost. Access via SSH tunnel or Reverse Proxy.
+      - "127.0.0.1:4000:4000"
     environment:
-      - TZ=UTC  # Set your timezone if needed, e.g., Europe/Berlin
-    # Optional: Uncomment and set if you want to persist settings
-    # volumes:
-    #   - ./mqtt-explorer-data:/data
+      - TZ=Asia/Kolkata # Configured to local timezone for accurate, human-readable message timestamps
+      # Optional variable if supported by underlying setups for custom root path routing
+      # - HTTP_SHARE_PATH=/mqtt-explorer 
+    volumes:
+      # MANDATORY FOR PRODUCTION: Without this, every single container restart will wipe out
+      # your saved broker connections, client IDs, certificates, and favorite topic paths.
+      - mqtt_explorer_data:/mqtt-explorer/config
+
+volumes:
+  mqtt_explorer_data:
