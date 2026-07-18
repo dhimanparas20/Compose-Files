@@ -1,15 +1,15 @@
+version: '3.8'
+
 services:
   mongodb:
-    image: mongo:7.0-noble # Pinned to a stable LTS version on a modern Ubuntu base rather than 'latest'
+    # FIXED: Swapped from '7.0-noble' to the correct official '7.0-jammy' tag
+    image: mongo:7.0-jammy 
     container_name: mongodb
     restart: always
     ports:
-      # If your application lives on the same server or in the same Docker network,
-      # REMOVE this ports block entirely! Let containers talk over the internal network.
-      # If external apps must connect, bind strictly to localhost:
+      # Keeps the port bound strictly to localhost for security
       - "127.0.0.1:27017:27017"
     environment:
-      # MANDATORY: Enables authentication out-of-the-box
       - MONGO_INITDB_ROOT_USERNAME=admin_root
       - MONGO_INITDB_ROOT_PASSWORD=your_super_strong_production_password_here
     volumes:
@@ -19,7 +19,6 @@ services:
       mongod 
       --auth 
       --wiredTigerCacheSizeGB 1.0
-    # Enforces hard resource limits so MongoDB doesn't choke the host OS
     deploy:
       resources:
         limits:
