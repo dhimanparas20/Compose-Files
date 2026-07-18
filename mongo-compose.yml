@@ -1,3 +1,5 @@
+# Connection String will be : mongodb://admin_root:your_super_strong_production_password_here@localhost:27017/?authSource=admin
+
 services:
   mongodb:
     # FIXED: Swapped from '7.0-noble' to the correct official '7.0-jammy' tag
