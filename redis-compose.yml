@@ -1,33 +1,47 @@
+version: '3.8'
+
 services:
   redis:
     container_name: redis
-    image: redis:latest
+    image: redis:7.4-alpine # Using an explicit, lightweight production tag instead of mutable 'latest'
     restart: always
     ports:
       - "6379:6379"
-    command:
-      [
-        "redis-server",
-        # "--requirepass", "yourpassword",
-        "--appendonly", "yes",
-        "--save", "900", "1",
-        "--save", "300", "10",
-        "--save", "60", "10000"
-      ]
+    command: >
+      redis-server
+      --requirepass "your_secure_password_here"
+      --appendonly yes
+      --appendfsync everysec
+      --no-appendfsync-on-rewrite yes
+      --auto-aof-rewrite-percentage 100
+      --auto-aof-rewrite-min-size 64mb
+      --maxmemory 2gb
+      --maxmemory-policy volatile-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
     volumes:
       - redis-data:/data
+    sysctls:
+      - net.core.somaxconn=511
 
   redisinsight:
     image: redis/redisinsight:latest
     container_name: redisinsight
     restart: always
     ports:
-      - "8001:5540"
+      # CRITICAL: Secures the UI. Binds it to localhost only. 
+      # Access it via SSH tunnel or reverse proxy so the public internet can't touch it.
+      - "127.0.0.1:8001:5540"
     depends_on:
       - redis
     environment:
-      - REDISINSIGHT_HOST=0.0.0.0
-      
+      - RI_APP_HOST=0.0.0.0
+      # Enforces a login screen on Redis Insight itself so strangers can't click around
+      - RI_ENCRYPTION_KEY=your_random_32char_secret_key_here
+    volumes:
+      - redisinsight-data:/data
 
 volumes:
   redis-data:
+  redisinsight-data: # Added persistence for Insight so you don't lose your saved connection profiles
