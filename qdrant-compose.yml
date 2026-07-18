@@ -1,15 +1,37 @@
+version: '3.8'
+
 services:
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.10.0 # Pin to a stable major version instead of mutable 'latest'
     container_name: qdrant
-    restart: unless-stopped
+    restart: always # 'always' handles system crashes better than 'unless-stopped'
     ports:
-      - "6333:6333"
+      - "6333:6333" # HTTP REST API
+      # - "6334:6334" # OPTIONAL: Expose if using gRPC (highly recommended for production performance)
     volumes:
-      - qdrant_data:/qdrant
+      - qdrant_data:/qdrant/storage # Hardened persistent storage path
+      # - ./qdrant_config.yaml:/qdrant/config/production.yaml # OPTIONAL: For deep custom configs
     environment:
-      QDRANT__SERVICE__API_KEY: "your-strong-api-key"  # <-- mapping, not a list
+      # --- Security & Authentication ---
+      - QDRANT__SERVICE__API_KEY=your-super-strong-production-api-key-here
+      - QDRANT__SERVICE__ENABLE_STATIC_CONTENT=false # Disables the default static welcome page
+      
+      # --- Logging ---
+      - QDRANT__LOG_LEVEL=info # Avoids debug pollution while keeping vital telemetry
+      
+      # --- Production Memory & Search Performance ---
+      - QDRANT__STORAGE__PERFORMANCE__MAX_SEARCH_THREADS=0 # '0' auto-detects and scales to available CPU cores
+      - QDRANT__STORAGE__ON_DISK_PAYLOAD=true # Crucial: Flushes text payloads to disk to save massive RAM
+      
+      # --- Snapshots & Recovery ---
+      - QDRANT__STORAGE__SNAPSHOTS_PATH=/qdrant/storage/snapshots
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+      memlock:
+        soft: -1
+        hard: -1
 
 volumes:
   qdrant_data:
-
